@@ -26,7 +26,7 @@ exports.create = function(req, res) {
 
   /* Instantiate a Listing */
   var listing = new Listing(req.body);
-
+	console.log('Creating New Listing');
   /* save the coordinates (located in req.results if there is an address property) */
   if(req.results) {
     listing.coordinates = {
@@ -42,7 +42,7 @@ exports.create = function(req, res) {
       res.status(400).send(err);
     } else {
       res.json(listing);
-      console.log(listing)
+      //console.log(listing)
     }
   });
 };
@@ -58,10 +58,29 @@ exports.update = function(req, res) {
   var listing = req.listing;
 
   /* Replace the listings's properties with the new properties found in req.body */
+ listing = Listing(req.body);
  
   /*save the coordinates (located in req.results if there is an address property) */
  
+  if (req.results) {
+      listing.coordinates = {
+          latitude: req.results.lat,
+          longitude: req.results.lng
+      };
+  }
+ 
+ 
   /* Save the listing */
+
+  listing.save(function(err) {
+    if(err) {
+      console.log(err);
+      res.status(400).send(err);
+    } else {
+      res.json(listing);
+    }
+  });
+
 
 };
 
@@ -69,13 +88,27 @@ exports.update = function(req, res) {
 exports.delete = function(req, res) {
   var listing = req.listing;
 
-  /* Add your code to remove the listins */
-
+   Listing.findByIdAndRemove(listing._id, function(err, listing) {
+    if (err) {
+      console.log(err);
+      res.status(400).send(err);
+    } else {
+      res.json(listing);
+    }
+  });
 };
 
 /* Retreive all the directory listings, sorted alphabetically by listing code */
 exports.list = function(req, res) {
   /* Add your code */
+ console.log('List ALL');
+  Listing.find({}, null, {sort: {code: 1}}, function(err, listing) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(listing);
+    }
+  }); 
 };
 
 /* 
